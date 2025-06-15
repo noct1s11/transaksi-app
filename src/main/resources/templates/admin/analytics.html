@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Analytics Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; margin: 0; background: #f0f4f8; color: #333; min-height: 100vh; display: flex; }
+        .sidebar { width: 220px; background: linear-gradient(180deg, #1976d2 80%, #21cbf3 100%); color: #fff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 30px 0 20px 0; box-shadow: 2px 0 12px rgba(33,150,243,0.07); position: fixed; left: 0; top: 0; z-index: 10; border-top-right-radius: 24px; border-bottom-right-radius: 24px; }
+        .sidebar .logo { width: 60px; margin-bottom: 18px; }
+        .sidebar .sidebar-title { font-size: 1.2em; font-weight: 700; margin-bottom: 30px; letter-spacing: 1px; }
+        .sidebar-nav { width: 100%; display: flex; flex-direction: column; gap: 10px; margin-bottom: 30px; align-items: center; }
+        .sidebar-nav a { width: 85%; background: rgba(255,255,255,0.08); color: #fff; padding: 12px 0; border-radius: 8px; text-decoration: none; font-weight: 600; text-align: center; display: flex; align-items: center; gap: 10px; transition: background 0.2s, color 0.2s, transform 0.2s; }
+        .sidebar-nav a.current, .sidebar-nav a:hover { background: #fff; color: #1976d2; transform: scale(1.04); }
+        .sidebar-nav a .icon { font-size: 1.2em; }
+        .sidebar .logout-form { margin-top: 30px; margin-bottom: 20px; width: 88%; align-self: center; position: static; }
+        .sidebar .logout-form button { width: 100%; background: linear-gradient(90deg, #dc3545 60%, #ff6f61 100%); color: white; border: none; padding: 12px 0; border-radius: 10px; cursor: pointer; font-size: 1.08em; font-weight: 700; transition: background 0.3s, transform 0.2s; box-shadow: 0 2px 8px rgba(220,53,69,0.10); }
+        .sidebar .logout-form button:hover { background: linear-gradient(90deg, #c82333 60%, #ff6f61 100%); color: #fff; transform: scale(1.04); }
+        .main-content { margin-left: 220px; width: calc(100% - 220px); padding: 40px 30px 30px 30px; min-height: 100vh; background: #f7fbff; }
+        h1 { color: #1976d2; text-align: center; margin-bottom: 30px; font-size: 2.2em; font-weight: 700; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Logo" class="logo">
+        <div class="sidebar-title">Admin Panel</div>
+        <div class="sidebar-nav">
+            <a th:href="@{/admin/dashboard}"><span class="icon">👤</span>Daftar User</a>
+            <a th:href="@{/admin/transactions}"><span class="icon">📋</span>Lihat Semua Transaksi</a>
+            <a th:href="@{/admin/user/add}"><span class="icon">➕</span>Tambah User Baru</a>
+            <a th:href="@{/admin/analytics}" class="current"><span class="icon">📊</span>Analytics Dashboard</a>
+        </div>
+        <form th:action="@{/logout}" method="post" class="logout-form">
+            <button type="submit">Logout</button>
+        </form>
+    </div>
+    <div class="main-content">
+        <h1>Analytics Dashboard</h1>
+        <div style="max-width:700px;margin:0 auto 40px auto;background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(33,150,243,0.07);padding:32px;">
+            <canvas id="userChart"></canvas>
+        </div>
+        <script th:inline="javascript">
+            const userLabels = [[${totalPerUser.keySet()}]];
+            const userTotals = [[${totalPerUser.values()}]];
+            const ctxUser = document.getElementById('userChart').getContext('2d');
+            new Chart(ctxUser, {
+                type: 'bar',
+                data: {
+                    labels: userLabels,
+                    datasets: [{
+                        label: 'Total Transaksi',
+                        data: userTotals,
+                        backgroundColor: '#1976d2',
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    plugins: { legend: { display: false } },
+                    scales: { x: { title: { display: true, text: 'User' } }, y: { title: { display: true, text: 'Jumlah (Rp)' } } }
+                }
+            });
+        </script>
+    </div>
+</body>
+</html>

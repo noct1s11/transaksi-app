@@ -4,6 +4,7 @@ import com.example.transaksi_app.model.Transaction; // PASTIKAN INI SESUAI
 import com.example.transaksi_app.model.User;       // PASTIKAN INI SESUAI
 import com.example.transaksi_app.repository.TransactionRepository; // PASTIKAN INI SESUAI
 import com.example.transaksi_app.repository.UserRepository;       // PASTIKAN INI SESUAI
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder; // Untuk hash password user baru
 import org.springframework.stereotype.Controller;
@@ -11,8 +12,15 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
 
 @Controller
 @RequestMapping("/admin")
@@ -29,11 +37,23 @@ public class AdminController {
         this.passwordEncoder = passwordEncoder;
     }
 
+    // Helper method untuk mengambil user yang sedang login
+    private User getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication.getName() == null || authentication.getName().equals("anonymousUser")) {
+            return null;
+        }
+        return userRepository.findByUsername(authentication.getName()).orElse(null);
+    }
+
     // Menampilkan Dashboard Admin (daftar users)
     @GetMapping("/dashboard")
-    public String adminDashboard(Model model) {
+    public String adminDashboard(Model model, HttpServletRequest request) {
         List<User> users = userRepository.findAll(); // Mendapatkan semua user
         model.addAttribute("users", users);
+        User currentUser = getCurrentUser();
+        model.addAttribute("currentUser", currentUser);
+        model.addAttribute("currentUri", request.getRequestURI());
         return "admin/dashboard"; // Mengarahkan ke admin/dashboard.html
     }
 
@@ -41,6 +61,8 @@ public class AdminController {
     @GetMapping("/user/add")
     public String showAddUserForm(Model model) {
         model.addAttribute("user", new User()); // Objek user kosong untuk form
+        User currentUser = getCurrentUser();
+        model.addAttribute("currentUser", currentUser);
         return "admin/add-user"; // Mengarahkan ke admin/add-user.html
     }
 
@@ -75,9 +97,12 @@ public class AdminController {
 
     // Menampilkan semua transaksi untuk Admin
     @GetMapping("/transactions")
-    public String adminTransactions(Model model) {
+    public String adminTransactions(Model model, HttpServletRequest request) {
         List<Transaction> transactions = transactionRepository.findAll(); // Mendapatkan semua transaksi
         model.addAttribute("transactions", transactions);
+        User currentUser = getCurrentUser();
+        model.addAttribute("currentUser", currentUser);
+        model.addAttribute("currentUri", request.getRequestURI());
         return "admin/transactions"; // Mengarahkan ke admin/transactions.html
     }
 
@@ -86,6 +111,8 @@ public class AdminController {
     public String showAddTransactionForm(Model model) {
         model.addAttribute("transaction", new Transaction());
         model.addAttribute("users", userRepository.findAll()); // Kirim daftar user agar admin bisa memilih
+        User currentUser = getCurrentUser();
+        model.addAttribute("currentUser", currentUser);
         return "admin/add-transaction"; // Mengarahkan ke admin/add-transaction.html
     }
 
@@ -117,6 +144,8 @@ public class AdminController {
                 .orElseThrow(() -> new IllegalArgumentException("Invalid transaction Id:" + id));
         model.addAttribute("transaction", transaction);
         model.addAttribute("users", userRepository.findAll()); // Kirim daftar user agar bisa dipilih
+        User currentUser = getCurrentUser();
+        model.addAttribute("currentUser", currentUser);
         return "admin/edit-transaction"; // Mengarahkan ke admin/edit-transaction.html
     }
 
@@ -155,6 +184,24 @@ public class AdminController {
         transactionRepository.deleteById(id);
         redirectAttributes.addFlashAttribute("message", "Transaksi berhasil dihapus.");
         return "redirect:/admin/transactions";
+    }
+
+    // Menampilkan analitik transaksi untuk Admin
+    @GetMapping("/analytics")
+    public String adminAnalytics(Model model, HttpServletRequest request) {
+        List<User> users = userRepository.findAll();
+        List<Transaction> transactions = transactionRepository.findAll();
+        // Data agregat per user
+        Map<String, Double> totalPerUser = new LinkedHashMap<>();
+        for (User user : users) {
+            double total = transactions.stream().filter(t -> t.getUser().getId().equals(user.getId())).mapToDouble(Transaction::getAmount).sum();
+            totalPerUser.put(user.getUsername(), total);
+        }
+        model.addAttribute("totalPerUser", totalPerUser);
+        User currentUser = getCurrentUser();
+        model.addAttribute("currentUser", currentUser);
+        model.addAttribute("currentUri", request.getRequestURI());
+        return "admin/analytics";
     }
     }
 

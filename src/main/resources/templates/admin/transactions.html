@@ -101,6 +101,35 @@
         .admin-nav .add-transaction-button:hover {
             background-color: #21cbf3;
         }
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        .sidebar-nav a {
+            background-color: #2196f3;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 2px 8px rgba(33,150,243,0.08);
+        }
+        .sidebar-nav a .icon {
+            font-size: 1.2em;
+        }
+        .sidebar-nav a:hover {
+            background-color: #1976d2;
+            transform: translateY(-2px);
+        }
+        .sidebar-nav a.current {
+            background-color: #0d47a1;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -261,11 +290,11 @@
 
         <h1>Manajemen Transaksi Admin</h1>
 
-        <div class="admin-nav">
+        <div class="sidebar-nav">
             <a th:href="@{/admin/dashboard}"><span class="icon">👤</span>Daftar User</a>
-            <a th:href="@{/admin/transactions}" class="current"><span class="icon">📋</span>Lihat Semua Transaksi</a>
+            <a th:href="@{/admin/transactions}"><span class="icon">📋</span>Lihat Semua Transaksi</a>
             <a th:href="@{/admin/user/add}"><span class="icon">➕</span>Tambah User Baru</a>
-            <a th:href="@{/admin/transaction/add}" class="add-transaction-button"><span class="icon">💸</span>Tambah Transaksi</a>
+            <a th:href="@{/admin/analytics}"><span class="icon">📊</span>Analytics Dashboard</a>
         </div>
 
         <div th:if="${message}" class="message-box success" th:text="${message}"></div>

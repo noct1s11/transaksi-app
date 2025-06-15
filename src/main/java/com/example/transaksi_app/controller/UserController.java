@@ -10,9 +10,17 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.util.StringUtils;
 
+import jakarta.servlet.http.HttpServletRequest;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 @Controller
 public class UserController {
@@ -46,14 +54,36 @@ public class UserController {
 
     // Menampilkan dashboard user
     @GetMapping("/user/dashboard")
-    public String userDashboard(Authentication authentication, Model model) {
+    public String userDashboard(Authentication authentication, Model model, HttpServletRequest request) {
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
         User user = userPrincipal.getUser(); // Ambil objek User asli dari UserPrincipal
 
         List<Transaction> transactions = transactionRepository.findByUser(user);
         model.addAttribute("transactions", transactions);
-        // Tambahkan atribut user untuk menampilkan nama user di dashboard
         model.addAttribute("currentUser", user);
+        // Hitung total pemasukan dan pengeluaran
+        double totalPemasukan = transactions.stream().filter(t -> "Pemasukan".equalsIgnoreCase(t.getType())).mapToDouble(Transaction::getAmount).sum();
+        double totalPengeluaran = transactions.stream().filter(t -> "Pengeluaran".equalsIgnoreCase(t.getType())).mapToDouble(Transaction::getAmount).sum();
+        model.addAttribute("totalPemasukan", totalPemasukan);
+        model.addAttribute("totalPengeluaran", totalPengeluaran);
+
+        // Data untuk grafik garis: total transaksi per tanggal
+        Map<String, Double> transaksiPerTanggal = new TreeMap<>();
+        transactions.forEach(t -> {
+            String tanggal = t.getDate().toString();
+            transaksiPerTanggal.put(tanggal, transaksiPerTanggal.getOrDefault(tanggal, 0.0) + t.getAmount());
+        });
+        model.addAttribute("transaksiPerTanggal", transaksiPerTanggal);
+
+        // Data untuk pie chart kategori
+        Map<String, Double> kategoriMap = new HashMap<>();
+        transactions.forEach(t -> {
+            String kategori = (t.getCategory() != null && !t.getCategory().isEmpty()) ? t.getCategory() : "Lainnya";
+            kategoriMap.put(kategori, kategoriMap.getOrDefault(kategori, 0.0) + t.getAmount());
+        });
+        model.addAttribute("kategoriMap", kategoriMap);
+        model.addAttribute("currentUri", request.getRequestURI());
+
         return "user/dashboard";
     }
 
@@ -74,12 +104,60 @@ public class UserController {
 
     // Endpoint untuk menampilkan daftar transaksi user
     @GetMapping("/user/transactions")
-    public String userTransactions(Authentication authentication, Model model) {
+    public String userTransactions(Authentication authentication, Model model, HttpServletRequest request) {
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
         User user = userPrincipal.getUser();
         List<Transaction> transactions = transactionRepository.findByUser(user);
         model.addAttribute("transactions", transactions);
         model.addAttribute("currentUser", user);
+        model.addAttribute("currentUri", request.getRequestURI());
         return "user/transactions";
+    }
+
+    // Menampilkan halaman analitik pengguna
+    @GetMapping("/user/analytics")
+    public String userAnalytics(Authentication authentication, Model model, HttpServletRequest request) {
+        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+        User user = userPrincipal.getUser();
+        List<Transaction> transactions = transactionRepository.findByUser(user);
+        // Data agregat sama seperti dashboard
+        double totalPemasukan = transactions.stream().filter(t -> "Pemasukan".equalsIgnoreCase(t.getType())).mapToDouble(Transaction::getAmount).sum();
+        double totalPengeluaran = transactions.stream().filter(t -> "Pengeluaran".equalsIgnoreCase(t.getType())).mapToDouble(Transaction::getAmount).sum();
+        model.addAttribute("totalPemasukan", totalPemasukan);
+        model.addAttribute("totalPengeluaran", totalPengeluaran);
+        Map<String, Double> transaksiPerTanggal = new TreeMap<>();
+        transactions.forEach(t -> {
+            String tanggal = t.getDate().toString();
+            transaksiPerTanggal.put(tanggal, transaksiPerTanggal.getOrDefault(tanggal, 0.0) + t.getAmount());
+        });
+        model.addAttribute("transaksiPerTanggal", transaksiPerTanggal);
+        Map<String, Double> kategoriMap = new HashMap<>();
+        transactions.forEach(t -> {
+            String kategori = (t.getCategory() != null && !t.getCategory().isEmpty()) ? t.getCategory() : "Lainnya";
+            kategoriMap.put(kategori, kategoriMap.getOrDefault(kategori, 0.0) + t.getAmount());
+        });
+        model.addAttribute("kategoriMap", kategoriMap);
+        model.addAttribute("currentUri", request.getRequestURI());
+        return "user/analytics";
+    }
+
+    // Endpoint untuk upload foto profil user
+    @PostMapping("/user/upload-profile-picture")
+    public String uploadProfilePicture(@RequestParam("file") MultipartFile file, Authentication authentication) throws IOException {
+        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+        User user = userPrincipal.getUser();
+        if (!file.isEmpty()) {
+            String originalFilename = file.getOriginalFilename();
+            if (originalFilename == null) originalFilename = "unknown";
+            String fileName = user.getId() + "_" + StringUtils.cleanPath(originalFilename);
+            // Use absolute path for uploads/profile-pictures/
+            File uploadPath = new File(System.getProperty("user.dir"), "uploads/profile-pictures/");
+            if (!uploadPath.exists()) uploadPath.mkdirs();
+            File dest = new File(uploadPath, fileName);
+            file.transferTo(dest);
+            user.setProfilePicture("/profile-pictures/" + fileName);
+            userRepository.save(user);
+        }
+        return "redirect:/user/dashboard";
     }
 }

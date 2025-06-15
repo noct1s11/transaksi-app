@@ -19,6 +19,9 @@ public class User {
     @Column(nullable = false)
     private String role; // Contoh: "ADMIN", "USER"
 
+    @Column(name = "profile_picture")
+    private String profilePicture; // Path atau URL foto profil
+
     // Relasi One-to-Many dengan Transaction
     // mappedBy menunjukkan field "user" di entity Transaction
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -65,6 +68,14 @@ public class User {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getProfilePicture() {
+        return profilePicture;
+    }
+
+    public void setProfilePicture(String profilePicture) {
+        this.profilePicture = profilePicture;
     }
 
     public Set<Transaction> getTransactions() {

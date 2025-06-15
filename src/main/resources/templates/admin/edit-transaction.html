@@ -116,9 +116,46 @@
                 font-size: 1.8em;
             }
         }
+
+        /* Sidebar styles */
+        .sidebar-nav {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            width: 250px;
+            box-sizing: border-box;
+        }
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+        }
+        .sidebar-nav a:hover {
+            background-color: #f0f0f0;
+        }
+        .sidebar-nav .icon {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
     </style>
 </head>
 <body>
+    <div class="sidebar-nav">
+        <a th:href="@{/admin/dashboard}"><span class="icon">👤</span>Daftar User</a>
+        <a th:href="@{/admin/transactions}"><span class="icon">📋</span>Lihat Semua Transaksi</a>
+        <a th:href="@{/admin/user/add}"><span class="icon">➕</span>Tambah User Baru</a>
+        <a th:href="@{/admin/analytics}"><span class="icon">📊</span>Analytics Dashboard</a>
+    </div>
     <div class="form-container">
         <h2>Edit Transaksi (Admin)</h2>
 

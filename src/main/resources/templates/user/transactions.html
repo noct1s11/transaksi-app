@@ -135,8 +135,9 @@
         <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Logo" class="logo">
         <div class="sidebar-title">Menu Pengguna</div>
         <div class="sidebar-nav">
-            <a th:href="@{/user/dashboard}" class="current"><span class="icon">🏠</span>Dashboard</a>
+            <a th:href="@{/user/dashboard}"><span class="icon">🏠</span>Dashboard</a>
             <a th:href="@{/user/transactions}"><span class="icon">📋</span>Transaksi Saya</a>
+            <a th:href="@{/user/analytics}"><span class="icon">📊</span>Analytics Dashboard</a>
         </div>
         <form th:action="@{/logout}" method="post" class="logout-form">
             <button type="submit">Logout</button>

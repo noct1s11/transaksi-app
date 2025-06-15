@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; margin: 0; background: #f0f4f8; color: #333; min-height: 100vh; display: flex; }
+        .sidebar { width: 220px; background: linear-gradient(180deg, #1a73e8 70%, #43e97b 100%); color: #fff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 32px 0 24px 0; box-shadow: 2px 0 16px rgba(33,150,243,0.10); position: fixed; left: 0; top: 0; z-index: 10; border-top-right-radius: 24px; border-bottom-right-radius: 24px; }
+        .sidebar .logo { width: 64px; margin-bottom: 20px; border-radius: 50%; box-shadow: 0 2px 8px rgba(33,150,243,0.10); }
+        .sidebar .sidebar-title { font-size: 1.25em; font-weight: 700; margin-bottom: 32px; letter-spacing: 1px; text-shadow: 0 2px 8px rgba(33,150,243,0.10); }
+        .sidebar-nav { width: 100%; display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; align-items: center; }
+        .sidebar-nav a { width: 88%; background: rgba(255,255,255,0.10); color: #fff; padding: 13px 0; border-radius: 10px; text-decoration: none; font-weight: 600; text-align: center; display: flex; align-items: center; gap: 10px; font-size: 1.08em; letter-spacing: 0.5px; transition: background 0.2s, color 0.2s, transform 0.2s, box-shadow 0.2s; box-shadow: 0 2px 8px rgba(33,150,243,0.06); }
+        .sidebar-nav a.current, .sidebar-nav a:hover { background: #fff; color: #1a73e8; transform: scale(1.05); box-shadow: 0 4px 16px rgba(33,150,243,0.13); }
+        .sidebar-nav a .icon { font-size: 1.2em; }
+        .sidebar .logout-form { margin-top: 30px; margin-bottom: 20px; width: 88%; align-self: center; position: static; }
+        .sidebar .logout-form button { width: 100%; background: linear-gradient(90deg, #dc3545 60%, #ff6f61 100%); color: white; border: none; padding: 12px 0; border-radius: 10px; cursor: pointer; font-size: 1.08em; font-weight: 700; transition: background 0.3s, transform 0.2s; box-shadow: 0 2px 8px rgba(220,53,69,0.10); }
+        .sidebar .logout-form button:hover { background: linear-gradient(90deg, #c82333 60%, #ff6f61 100%); color: #fff; transform: scale(1.04); }
+        .main-content { margin-left: 220px; width: calc(100% - 220px); padding: 40px 30px 30px 30px; min-height: 100vh; background: #f7fbff; }
+        h1 { color: #1a73e8; text-align: center; margin-bottom: 30px; font-size: 2.2em; font-weight: 700; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Logo" class="logo">
+        <div class="sidebar-title">Menu Pengguna</div>
+        <div class="sidebar-nav">
+            <a th:href="@{/user/dashboard}"><span class="icon">🏠</span>Dashboard</a>
+            <a th:href="@{/user/transactions}"><span class="icon">📋</span>Transaksi Saya</a>
+            <a th:href="@{/user/analytics}" class="current"><span class="icon">📊</span>Analytics Dashboard</a>
+        </div>
+        <form th:action="@{/logout}" method="post" class="logout-form">
+            <button type="submit">Logout</button>
+        </form>
+    </div>
+    <div class="main-content">
+        <h1>Analytics Dashboard</h1>
+        <div style="display:flex;flex-wrap:wrap;gap:32px;align-items:flex-start;margin-bottom:30px;justify-content:center;">
+            <div style="flex:2;min-width:320px;max-width:600px;">
+                <canvas id="lineChart"></canvas>
+            </div>
+            <div style="flex:1;min-width:220px;max-width:320px;">
+                <canvas id="pieChart"></canvas>
+            </div>
+        </div>
+        <script th:inline="javascript">
+            // Data untuk grafik garis (total transaksi per tanggal)
+            const tanggalLabels = [[${transaksiPerTanggal.keySet()}]];
+            const totalPerTanggal = [[${transaksiPerTanggal.values()}]];
+            const ctxLine = document.getElementById('lineChart').getContext('2d');
+            new Chart(ctxLine, {
+                type: 'line',
+                data: {
+                    labels: tanggalLabels,
+                    datasets: [{
+                        label: 'Total Transaksi',
+                        data: totalPerTanggal,
+                        borderColor: '#1a73e8',
+                        backgroundColor: 'rgba(67,233,123,0.15)',
+                        tension: 0.3,
+                        fill: true,
+                        pointRadius: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: { x: { title: { display: true, text: 'Tanggal' } }, y: { title: { display: true, text: 'Jumlah (Rp)' } } }
+                }
+            });
+            // Data untuk pie chart kategori
+            const kategoriLabels = [[${kategoriMap.keySet()}]];
+            const kategoriData = [[${kategoriMap.values()}]];
+            const ctxPie = document.getElementById('pieChart').getContext('2d');
+            new Chart(ctxPie, {
+                type: 'pie',
+                data: {
+                    labels: kategoriLabels,
+                    datasets: [{
+                        data: kategoriData,
+                        backgroundColor: ['#1a73e8','#43e97b','#ff6f61','#fbbc05','#ab47bc','#29b6f6','#ffa726','#8d6e63'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+        </script>
+    </div>
+</body>
+</html>
