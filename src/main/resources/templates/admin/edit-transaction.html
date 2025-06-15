@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Transaksi (Admin)</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #fff3e0; /* Light orange background */
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .form-container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            width: 100%;
+            max-width: 600px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        h2 {
+            color: #ff8f00; /* Orange color */
+            margin-bottom: 30px;
+            font-size: 2em;
+            font-weight: 600;
+        }
+        .message-box {
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+            font-size: 0.95em;
+            display: block;
+        }
+        .message-box.error {
+            background-color: #ffe0e0;
+            color: #d32f2f;
+            border: 1px solid #d32f2f;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+        }
+        input[type="text"], input[type="number"], select {
+            width: calc(100% - 20px);
+            padding: 12px 10px;
+            border: 1px solid #c8d8e0;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+        input[type="text"]:focus, input[type="number"]:focus, select:focus {
+            border-color: #ff8f00;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(255, 143, 0, 0.2);
+        }
+        button {
+            background-color: #ff8f00; /* Orange */
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 500;
+            margin-top: 20px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            width: 100%;
+        }
+        button.back-button {
+            background-color: #6c757d;
+            margin-top: 10px;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        button.back-button:hover {
+            background-color: #5a6268;
+        }
+        button.main-button:hover {
+            background-color: #e07b00;
+        }
+
+        /* Logout button */
+        .logout-form {
+            margin-top: 20px;
+            align-self: flex-end;
+        }
+        @media (max-height: 700px) {
+            .logout-form {
+                margin-top: 10px;
+                position: static;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .form-container {
+                padding: 25px;
+                margin: 0 10px;
+            }
+            h2 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Edit Transaksi (Admin)</h2>
+
+        <div th:if="${error}" class="message-box error" th:text="${error}"></div>
+
+        <form th:action="@{/admin/transaction/{id}(id=${transaction.id})}" method="post">
+            <div class="form-group">
+                <label for="description">Deskripsi / Keterangan:</label>
+                <input type="text" id="description" name="description" th:value="${transaction.description}" required>
+            </div>
+            <div class="form-group">
+                <label for="amount">Jumlah:</label>
+                <input type="number" id="amount" name="amount" th:value="${transaction.amount}" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="type">Tipe:</label>
+                <select id="type" name="type" required>
+                    <option value="Pemasukan" th:selected="${transaction.type == 'Pemasukan'}">Pemasukan</option>
+                    <option value="Pengeluaran" th:selected="${transaction.type == 'Pengeluaran'}">Pengeluaran</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="category">Kategori (Opsional):</label>
+                <input type="text" id="category" name="category" th:value="${transaction.category}">
+            </div>
+            <div class="form-group">
+                <label for="userId">Pilih User:</label>
+                <select id="userId" name="userId" required>
+                    <option th:each="user : ${users}" th:value="${user.id}" th:text="${user.username}" th:selected="${transaction.user.id == user.id}"></option>
+                </select>
+            </div>
+            <button type="submit" class="main-button">Simpan Perubahan</button>
+        </form>
+        <a th:href="@{/admin/transactions}">
+            <button type="button" class="back-button">Kembali ke Daftar Transaksi</button>
+        </a>
+    </div>
+</body>
+</html>
