@@ -74,9 +74,9 @@
             transform: scale(1.04);
         }
         .sidebar .logout-form {
-            margin-top: 30px;
+            margin-top: 32px;
             margin-bottom: 20px;
-            width: 88%;
+            width: 90%;
             align-self: center;
             position: static;
         }
@@ -225,12 +225,14 @@
 </head>
 <body>
     <div class="sidebar">
-        <img th:src="${currentUser.profilePicture != null ? currentUser.profilePicture : 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'}" alt="Logo" class="logo" style="object-fit:cover;border-radius:50%;width:80px;height:80px;">
-        <form th:action="@{/user/upload-profile-picture}" method="post" enctype="multipart/form-data" style="margin-top:10px;text-align:center;">
-            <input type="file" name="file" accept="image/*" style="display:block;margin:auto 0 8px 0;" required>
-            <button type="submit" style="background:#fff;color:#1976d2;border:none;padding:4px 12px;border-radius:8px;cursor:pointer;font-size:0.9em;">Upload Foto</button>
+        <img th:src="${currentUser.profilePicture != null ? currentUser.profilePicture : 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'}"
+             alt="Foto Profil" class="logo"
+             style="object-fit:cover;border-radius:50%;width:90px;height:90px;margin-bottom:12px;box-shadow:0 2px 8px rgba(33,150,243,0.13);border:3px solid #fff;">
+        <form th:action="@{/admin/upload-profile-picture}" method="post" enctype="multipart/form-data" style="margin-top:8px;text-align:center;width:90%;">
+            <input type="file" name="file" accept="image/*" style="display:block;margin:0 auto 8px auto;padding:2px 0 2px 0;width:100%;font-size:0.95em;" required>
+            <button type="submit" style="background:#fff;color:#1976d2;border:none;padding:5px 0;border-radius:8px;cursor:pointer;font-size:0.95em;width:100%;font-weight:600;box-shadow:0 1px 4px rgba(33,150,243,0.08);">Upload Foto</button>
         </form>
-        <div class="sidebar-title">Admin Panel</div>
+        <div class="sidebar-title" style="margin-top:18px;margin-bottom:18px;font-size:1.15em;letter-spacing:0.5px;">Admin Panel</div>
         <div class="sidebar-nav">
             <a th:href="@{/admin/dashboard}" th:classappend="${currentUri.contains('/dashboard')} ? 'current'">
                 <span class="icon">👤</span>Daftar User
@@ -245,7 +247,7 @@
                 <span class="icon">📊</span>Analytics Dashboard
             </a>
         </div>
-        <form th:action="@{/logout}" method="post" class="logout-form">
+        <form th:action="@{/logout}" method="post" class="logout-form" style="margin-top:32px;width:90%;">
             <button type="submit">Logout</button>
         </form>
     </div>
