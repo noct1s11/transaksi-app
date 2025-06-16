@@ -14,13 +14,18 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.util.StringUtils;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
+import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+
+import com.lowagie.text.*;
+import com.lowagie.text.pdf.*;
 
 @Controller
 public class UserController {
@@ -159,5 +164,53 @@ public class UserController {
             userRepository.save(user);
         }
         return "redirect:/user/dashboard";
+    }
+
+    // Endpoint untuk mencetak rapor transaksi ke PDF
+    @GetMapping("/user/cetak-rapor")
+    public void cetakRaporTransaksi(Authentication authentication, HttpServletResponse response) throws Exception {
+        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+        User user = userPrincipal.getUser();
+        List<Transaction> transactions = transactionRepository.findByUser(user);
+
+        response.setContentType("application/pdf");
+        response.setHeader("Content-Disposition", "attachment; filename=rapor-transaksi-" + user.getUsername() + ".pdf");
+        Document document = new Document(PageSize.A4);
+        PdfWriter.getInstance(document, response.getOutputStream());
+        document.open();
+
+        Font titleFont = new Font(Font.HELVETICA, 16, Font.BOLD, Color.BLUE);
+        Font headerFont = new Font(Font.HELVETICA, 12, Font.BOLD, Color.WHITE);
+        Font cellFont = new Font(Font.HELVETICA, 11, Font.NORMAL, Color.BLACK);
+
+        Paragraph title = new Paragraph("REKAP TRANSAKSI", titleFont);
+        title.setAlignment(Element.ALIGN_CENTER);
+        document.add(title);
+        document.add(new Paragraph("Nama: " + user.getUsername(), cellFont));
+        document.add(new Paragraph("Tanggal Cetak: " + java.time.LocalDate.now(), cellFont));
+        document.add(new Paragraph(" "));
+
+        PdfPTable table = new PdfPTable(6);
+        table.setWidthPercentage(100);
+        table.setWidths(new float[]{1.2f, 3f, 2f, 2.2f, 2f, 2.2f});
+
+        String[] headers = {"ID", "Deskripsi", "Jumlah", "Tanggal", "Tipe", "Kategori"};
+        for (String h : headers) {
+            PdfPCell cell = new PdfPCell(new Phrase(h, headerFont));
+            cell.setBackgroundColor(Color.BLUE);
+            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            cell.setPadding(6f);
+            table.addCell(cell);
+        }
+        for (Transaction t : transactions) {
+            table.addCell(new Phrase(String.valueOf(t.getId()), cellFont));
+            table.addCell(new Phrase(t.getDescription(), cellFont));
+            table.addCell(new Phrase(String.format("%,.2f Rp", t.getAmount()), cellFont));
+            table.addCell(new Phrase(t.getDate().toString(), cellFont));
+            table.addCell(new Phrase(t.getType(), cellFont));
+            table.addCell(new Phrase(t.getCategory() != null ? t.getCategory() : "-", cellFont));
+        }
+        document.add(table);
+        document.close();
     }
 }

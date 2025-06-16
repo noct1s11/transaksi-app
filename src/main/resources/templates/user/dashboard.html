@@ -337,6 +337,16 @@
         <div class="footer">
             &copy; 2025 Aplikasi Transaksi. Dibuat dengan <span style="color:#1a73e8">&#10084;</span> oleh Tim Anda.
         </div>
+        <div style="margin-top:32px;">
+            <div class="message-box success show" th:if="${message}" th:text="${message}"></div>
+            <div class="message-box error show" th:if="${error}" th:text="${error}"></div>
+            <h3>Cetak Rapor Transaksi</h3>
+            <form th:action="@{/user/cetak-rapor}" method="get" target="_blank">
+                <button type="submit" style="background:#43e97b;color:#fff;font-weight:700;padding:12px 24px;border:none;border-radius:8px;font-size:1.1em;cursor:pointer;box-shadow:0 2px 8px rgba(67,233,123,0.13);">
+                    <span style="font-size:1.2em;margin-right:8px;">⬇️</span> Unduh Rapor PDF
+                </button>
+            </form>
+        </div>
     </div>
 </body>
 </html>

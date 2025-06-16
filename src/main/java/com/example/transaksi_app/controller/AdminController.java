@@ -22,6 +22,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 
+import com.lowagie.text.*;
+import com.lowagie.text.pdf.*;
+import java.awt.Color;
+import jakarta.servlet.http.HttpServletResponse;
+
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
@@ -202,6 +207,52 @@ public class AdminController {
         model.addAttribute("currentUser", currentUser);
         model.addAttribute("currentUri", request.getRequestURI());
         return "admin/analytics";
+    }
+
+    // Endpoint untuk generate PDF semua transaksi (admin) dengan OpenPDF
+    @GetMapping("/transactions/cetak-rapor")
+    public void cetakRaporSemuaTransaksi(HttpServletResponse response) throws Exception {
+        List<Transaction> transactions = transactionRepository.findAll();
+        response.setContentType("application/pdf");
+        response.setHeader("Content-Disposition", "attachment; filename=rapor-semua-transaksi.pdf");
+        Document document = new Document(PageSize.A4);
+        PdfWriter.getInstance(document, response.getOutputStream());
+        document.open();
+
+        Font titleFont = new Font(Font.HELVETICA, 16, Font.BOLD, Color.BLUE);
+        Font headerFont = new Font(Font.HELVETICA, 12, Font.BOLD, Color.WHITE);
+        Font cellFont = new Font(Font.HELVETICA, 11, Font.NORMAL, Color.BLACK);
+
+        Paragraph title = new Paragraph("REKAP SEMUA TRANSAKSI", titleFont);
+        title.setAlignment(Element.ALIGN_CENTER);
+        document.add(title);
+        document.add(new Paragraph("Tanggal Cetak: " + java.time.LocalDate.now(), cellFont));
+        document.add(new Paragraph(" "));
+
+        PdfPTable table = new PdfPTable(7);
+        table.setWidthPercentage(100);
+        table.setWidths(new float[]{1.2f, 2.2f, 3f, 2f, 2.2f, 2f, 2.2f});
+
+        String[] headers = {"No", "User", "Deskripsi", "Jumlah", "Tanggal", "Tipe", "Kategori"};
+        for (String h : headers) {
+            PdfPCell cell = new PdfPCell(new Phrase(h, headerFont));
+            cell.setBackgroundColor(Color.BLUE);
+            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            cell.setPadding(6f);
+            table.addCell(cell);
+        }
+        int no = 1;
+        for (Transaction t : transactions) {
+            table.addCell(new Phrase(String.valueOf(no++), cellFont));
+            table.addCell(new Phrase(t.getUser().getUsername(), cellFont));
+            table.addCell(new Phrase(t.getDescription(), cellFont));
+            table.addCell(new Phrase(String.format("%,.2f Rp", t.getAmount()), cellFont));
+            table.addCell(new Phrase(t.getDate().toString(), cellFont));
+            table.addCell(new Phrase(t.getType(), cellFont));
+            table.addCell(new Phrase(t.getCategory() != null ? t.getCategory() : "-", cellFont));
+        }
+        document.add(table);
+        document.close();
     }
     }
 

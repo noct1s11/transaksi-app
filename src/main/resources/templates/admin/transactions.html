@@ -288,6 +288,14 @@
             </form>
         </div>
 
+        <div style="margin-bottom: 24px; text-align: right;">
+            <form th:action="@{/admin/transactions/cetak-rapor}" method="get" style="display:inline-block;">
+                <button type="submit" style="background:#43e97b;color:#fff;font-weight:700;padding:10px 22px;border:none;border-radius:8px;font-size:1em;cursor:pointer;box-shadow:0 2px 8px rgba(67,233,123,0.13);">
+                    <span style="font-size:1.2em;margin-right:8px;">⬇️</span> Unduh Rapor PDF
+                </button>
+            </form>
+        </div>
+
         <h1>Manajemen Transaksi Admin</h1>
 
         <div class="sidebar-nav">
