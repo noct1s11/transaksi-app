@@ -51,7 +51,7 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return user.isActive();
     }
 
     // Metode tambahan untuk mendapatkan objek User asli

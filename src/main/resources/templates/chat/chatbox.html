@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat</title>
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+    <style>
+        .chatbox-container { max-width: 600px; margin: 40px auto; background: #fff; border-radius: 14px; box-shadow: 0 2px 12px rgba(33,150,243,0.07); padding: 28px; }
+        .chat-header { color: #1976d2; font-size: 1.3em; font-weight: 700; margin-bottom: 18px; }
+        .chat-messages { min-height: 220px; max-height: 340px; overflow-y: auto; margin-bottom: 18px; }
+        .chat-message { margin-bottom: 12px; display: flex; flex-direction: column; }
+        .chat-message.me { align-items: flex-end; }
+        .chat-message .sender { font-weight: 600; color: #1976d2; font-size: 0.98em; }
+        .chat-message.me .sender { color: #43e97b; }
+        .chat-message .content { background: #f0f4f8; border-radius: 8px; padding: 8px 16px; display: inline-block; max-width: 70%; }
+        .chat-message.me .content { background: #1976d2; color: #fff; }
+        .chat-message .timestamp { font-size: 0.85em; color: #888; margin-top: 2px; }
+        .chat-form { display: flex; gap: 10px; }
+        .chat-form input[type=text] { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #e0e0e0; font-size: 1em; }
+        .chat-form button { background: #1976d2; color: #fff; border: none; border-radius: 8px; padding: 10px 22px; font-weight: 700; font-size: 1em; cursor: pointer; transition: background 0.2s; }
+        .chat-form button:hover { background: #125ea2; }
+        .back-link { display: inline-block; margin-bottom: 18px; color: #1976d2; text-decoration: none; font-weight: 600; }
+        .error-message { color: #d32f2f; font-weight: bold; margin-bottom: 18px; }
+    </style>
+</head>
+<body>
+    <div class="chatbox-container">
+        <a th:href="@{/chat}" class="back-link">&larr; Kembali ke daftar user</a>
+        <div class="chat-header">Chat dengan <span th:text="${receiver != null} ? ${receiver} : 'Tidak diketahui'"></span></div>
+        <div th:if="${receiver == null || currentUser == null}" class="error-message">
+            Terjadi kesalahan: Data user/receiver tidak ditemukan. Silakan kembali ke daftar user.
+        </div>
+        <div class="chat-messages" th:if="${receiver != null} and ${currentUser != null}">
+            <div th:each="msg : ${messages}" th:classappend="${msg.sender == currentUser} ? 'chat-message me' : 'chat-message'">
+                <span class="sender" th:text="${msg.sender}"></span>
+                <span class="content" th:text="${msg.content}"></span>
+                <span class="timestamp" th:text="${#temporals.format(msg.timestamp, 'dd-MM-yyyy HH:mm')}"></span>
+            </div>
+        </div>
+        <div id="chatError" class="error-message" style="display:none"></div>
+        <form th:if="${receiver != null} and ${currentUser != null}" th:action="@{/chat/send}" method="post" class="chat-form" id="chatForm">
+            <input type="hidden" name="receiver" th:value="${receiver}" />
+            <input type="text" name="content" placeholder="Tulis pesan..." required autocomplete="off" id="chatInput" />
+            <button type="submit">Kirim</button>
+        </form>
+    </div>
+    <script>
+    // Kirim pesan via AJAX dengan CSRF
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('chatForm');
+        const chatMessages = document.querySelector('.chat-messages');
+        const chatError = document.getElementById('chatError');
+        function appendMessage(sender, content, timestamp, isMe) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'chat-message' + (isMe ? ' me' : '');
+            msgDiv.innerHTML = `<span class="sender">${sender}</span><span class="content">${content}</span><span class="timestamp">${timestamp}</span>`;
+            chatMessages.appendChild(msgDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                chatError.style.display = 'none';
+                const receiver = form.querySelector('input[name="receiver"]').value;
+                const content = form.querySelector('input[name="content"]').value;
+                const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+                const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+                fetch('/chat/api/send', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        [csrfHeader]: csrfToken
+                    },
+                    credentials: 'same-origin',
+                    body: new URLSearchParams({receiver, content})
+                })
+                .then(res => {
+                    if (!res.ok) return res.text().then(t => { throw new Error(t || 'Gagal mengirim pesan'); });
+                    return res.json();
+                })
+                .then(data => {
+                    form.querySelector('input[name="content"]').value = '';
+                    // Tambahkan pesan baru ke chat tanpa reload
+                    appendMessage(data.sender || 'Saya', data.content, data.timestamp || new Date().toLocaleString(), true);
+                })
+                .catch(err => {
+                    chatError.textContent = 'Gagal mengirim pesan: ' + err.message;
+                    chatError.style.display = 'block';
+                });
+            });
+        }
+    });
+    </script>
+</body>
+</html>

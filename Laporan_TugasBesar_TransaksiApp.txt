@@ -1,0 +1,57 @@
+LAPORAN TUGAS BESAR OOP
+Aplikasi Manajemen Transaksi Keuangan
+Kelompok: [Nama/NIM Anda]
+
+1. Latar Belakang
+Aplikasi transaksi-app dibuat untuk membantu pengguna dalam mencatat, memantau, dan menganalisis transaksi keuangan pribadi maupun organisasi. Dengan fitur dashboard, upload foto profil, serta cetak rapor transaksi ke PDF, aplikasi ini memudahkan pengelolaan keuangan secara digital dan modern.
+
+2. Tujuan
+- Memudahkan pencatatan pemasukan dan pengeluaran.
+- Menyediakan visualisasi statistik transaksi.
+- Memungkinkan user dan admin mengelola data secara terpisah.
+- Menyediakan fitur cetak rapor transaksi ke PDF.
+
+3. Fitur Utama
+1. Autentikasi & Otorisasi (Login, register, role USER & ADMIN)
+2. Dashboard User (Input transaksi, upload foto profil, sidebar modern, statistik, cetak PDF)
+3. Dashboard Admin (Kelola user, kelola transaksi, cetak PDF, sidebar modern)
+4. Keamanan (Spring Security, password terenkripsi, akses resource statis aman)
+
+4. Implementasi Teknis
+- Backend: Spring Boot 3, Maven, JPA, MySQL
+- Frontend: Thymeleaf, HTML, CSS
+- PDF Generator: OpenPDF (LibrePDF)
+- Struktur Project:
+  src/
+    main/
+      java/com/example/transaksi_app/
+        controller/
+        model/
+        repository/
+        security/
+      resources/
+        templates/
+        static/
+        application.properties
+- Repository GitHub: https://github.com/noct1s11/transaksi-app
+
+5. Cara Kerja Fitur Cetak Rapor PDF
+- User/Admin klik tombol "Unduh Rapor PDF".
+- Backend mengambil data transaksi dari database.
+- Data diformat ke tabel PDF menggunakan OpenPDF.
+- File PDF dikirim ke browser dan otomatis diunduh.
+
+6. Tampilan Aplikasi
+- Dashboard User: (lampirkan screenshot dashboard user)
+- Dashboard Admin: (lampirkan screenshot dashboard admin)
+- Contoh PDF: (lampirkan screenshot PDF)
+
+7. Kesimpulan
+Aplikasi transaksi-app berhasil memenuhi kebutuhan pencatatan dan pelaporan transaksi keuangan secara digital, dengan fitur modern dan keamanan yang baik.
+
+8. Daftar Pustaka
+- Dokumentasi Spring Boot
+- Dokumentasi OpenPDF
+- Dokumentasi Thymeleaf
+
+Catatan: Silakan tambahkan nama anggota, NIM, dan screenshot aplikasi Anda sendiri. Jika ingin format .docx, salin isi ini ke Word/Google Docs lalu ekspor ke PDF.

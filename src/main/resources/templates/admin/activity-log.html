@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="id">
+<head>
+    <title>Log Aktivitas Admin</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f7fa;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+        }
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 240px;
+            background: #fff;
+            box-shadow: 2px 0 16px rgba(0,0,0,0.07);
+            padding: 40px 0 0 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+        }
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            padding: 14px 32px;
+            margin-bottom: 8px;
+            border-radius: 0 30px 30px 0;
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            font-size: 1.08em;
+            transition: background 0.2s, color 0.2s;
+        }
+        .sidebar-nav a:hover, .sidebar-nav a.active {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        .sidebar-nav .icon {
+            margin-right: 12px;
+            font-size: 1.2em;
+        }
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 0;
+            margin-left: 240px;
+            min-height: 100vh;
+        }
+        h2 {
+            color: #1976d2;
+            margin-bottom: 28px;
+            font-size: 2em;
+            font-weight: 700;
+        }
+        .message-box {
+            padding: 12px 18px;
+            margin-bottom: 18px;
+            border-radius: 7px;
+            font-size: 1em;
+            display: block;
+        }
+        .message-box.success {
+            background: #e8f5e9;
+            color: #388e3c;
+            border: 1px solid #388e3c;
+        }
+        .message-box.error {
+            background: #ffe0e0;
+            color: #d32f2f;
+            border: 1px solid #d32f2f;
+        }
+        .log-table {
+            width: 100%;
+            max-width: 900px;
+            border-collapse: collapse;
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+        .log-table th, .log-table td {
+            padding: 14px 16px;
+            text-align: left;
+        }
+        .log-table th {
+            background: #e3f2fd;
+            color: #1976d2;
+            font-weight: 600;
+            border-bottom: 2px solid #bbdefb;
+        }
+        .log-table tr:nth-child(even) {
+            background: #f7fbff;
+        }
+        .log-table tr:last-child td {
+            border-bottom: none;
+        }
+        .back-btn {
+            display: inline-block;
+            background: #6c757d;
+            color: #fff;
+            padding: 10px 28px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            margin-top: 10px;
+            transition: background 0.2s;
+        }
+        .back-btn:hover {
+            background: #495057;
+        }
+        @media (max-width: 900px) {
+            .sidebar-nav {
+                width: 60px;
+                padding: 20px 0 0 0;
+            }
+            .sidebar-nav a {
+                padding: 12px 10px;
+                font-size: 1em;
+                justify-content: center;
+            }
+            .sidebar-nav a span:not(.icon) {
+                display: none;
+            }
+            .main-content {
+                margin-left: 60px;
+                padding: 20px 0;
+            }
+        }
+        @media (max-width: 600px) {
+            .main-content {
+                padding: 10px 0;
+            }
+            .log-table th, .log-table td {
+                padding: 8px 6px;
+                font-size: 0.95em;
+            }
+            h2 {
+                font-size: 1.3em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar-nav">
+        <a th:href="@{/admin/dashboard}"><span class="icon">👤</span><span>Daftar User</span></a>
+        <a th:href="@{/admin/transactions}"><span class="icon">📋</span><span>Lihat Semua Transaksi</span></a>
+        <a th:href="@{/admin/user/add}"><span class="icon">➕</span><span>Tambah User Baru</span></a>
+        <a th:href="@{/admin/analytics}"><span class="icon">📊</span><span>Analytics Dashboard</span></a>
+        <a th:href="@{/admin/activity-log}" class="active"><span class="icon">📝</span><span>Log Aktivitas</span></a>
+    </div>
+    <div class="main-content">
+        <h2>Log Aktivitas</h2>
+        <div th:if="${message}" class="message-box success" th:text="${message}"></div>
+        <div th:if="${error}" class="message-box error" th:text="${error}"></div>
+        <table class="log-table">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Admin</th>
+                    <th>Aksi</th>
+                    <th>Detail</th>
+                    <th>Waktu</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="log, stat : ${logs}">
+                    <td th:text="${stat.count}"></td>
+                    <td th:text="${log.user.username}"></td>
+                    <td th:text="${log.action}"></td>
+                    <td th:text="${log.details}"></td>
+                    <td th:text="${#temporals.format(log.timestamp, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(logs)}">
+                    <td colspan="5">Belum ada aktivitas.</td>
+                </tr>
+            </tbody>
+        </table>
+        <a th:href="@{/admin/dashboard}" class="back-btn">Kembali ke Dashboard</a>
+    </div>
+</body>
+</html>

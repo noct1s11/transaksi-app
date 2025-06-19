@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 
 @Entity
+@Table(name = "transaction") // Pastikan entity map ke tabel yang benar
 public class Transaction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,6 +28,14 @@ public class Transaction {
     @ManyToOne(fetch = FetchType.LAZY) // Relasi Many-to-One dengan User
     @JoinColumn(name = "user_id", nullable = false) // Kolom foreign key
     private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category categoryEntity;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "wallet_id")
+    private Wallet wallet;
 
     // --- Constructors ---
     public Transaction() {
@@ -97,5 +106,21 @@ public class Transaction {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public Category getCategoryEntity() {
+        return categoryEntity;
+    }
+
+    public void setCategoryEntity(Category categoryEntity) {
+        this.categoryEntity = categoryEntity;
+    }
+
+    public Wallet getWallet() {
+        return wallet;
+    }
+
+    public void setWallet(Wallet wallet) {
+        this.wallet = wallet;
     }
 }

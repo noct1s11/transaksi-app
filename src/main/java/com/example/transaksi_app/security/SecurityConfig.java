@@ -26,12 +26,10 @@ public class SecurityConfig implements WebMvcConfigurer {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/user/upload-profile-picture").hasAnyRole("USER", "ADMIN")
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
-                // PASTIKAN BARIS INI KEMBALI SEPERTI SEMULA, TANPA "/admin/generate-hash"
                 .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/images/**").permitAll()
                 .anyRequest().authenticated()
             )
@@ -44,12 +42,16 @@ public class SecurityConfig implements WebMvcConfigurer {
                 .logoutUrl("/logout")
                 .logoutSuccessUrl("/login?logout")
                 .permitAll()
+            )
+            .csrf(csrf -> csrf
+                .ignoringRequestMatchers("/chat/api/**")
             );
         return http.build();
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
+        // Gunakan BCrypt untuk keamanan password
         return new BCryptPasswordEncoder();
     }
 

@@ -1,14 +1,13 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tambah Transaksi Baru (Admin)</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}" />
+    <title>Tambah Transaksi</title>
+    <link rel="stylesheet" href="/css/style.css">
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #e0f7fa;
+            background-color: #f5f7fa;
             margin: 0;
             min-height: 100vh;
             display: flex;
@@ -18,7 +17,7 @@
             top: 0;
             left: 0;
             height: 100vh;
-            width: 240px;
+            width: 220px;
             background: #fff;
             box-shadow: 2px 0 16px rgba(0,0,0,0.07);
             padding: 40px 0 0 0;
@@ -39,8 +38,8 @@
             transition: background 0.2s, color 0.2s;
         }
         .sidebar-nav a:hover, .sidebar-nav a.active {
-            background: #b2ebf2;
-            color: #00796b;
+            background: #e3f2fd;
+            color: #1976d2;
         }
         .sidebar-nav .icon {
             margin-right: 12px;
@@ -49,24 +48,14 @@
         .main-content {
             flex: 1;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
             padding: 40px 0;
-            margin-left: 240px;
+            margin-left: 220px;
             min-height: 100vh;
         }
-        .form-container {
-            background: white;
-            padding: 40px 36px 32px 36px;
-            border-radius: 14px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.13);
-            width: 100%;
-            max-width: 520px;
-            box-sizing: border-box;
-            text-align: center;
-        }
-        h2 {
-            color: #00796b;
+        h1 {
+            color: #1976d2;
             margin-bottom: 28px;
             font-size: 2em;
             font-weight: 700;
@@ -88,17 +77,27 @@
             color: #d32f2f;
             border: 1px solid #d32f2f;
         }
-        .form-group {
+        .transaction-form {
+            background: #fff;
+            padding: 32px 28px 24px 28px;
+            border-radius: 14px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.13);
+            width: 100%;
+            max-width: 420px;
+            box-sizing: border-box;
+            margin-bottom: 18px;
+        }
+        .transaction-form .form-group {
             margin-bottom: 18px;
             text-align: left;
         }
-        .form-group label {
+        .transaction-form label {
             display: block;
             margin-bottom: 6px;
             font-weight: 500;
             color: #555;
         }
-        input[type="text"], select {
+        .transaction-form input[type="text"], .transaction-form select {
             width: 100%;
             padding: 12px 10px;
             border: 1px solid #c8d8e0;
@@ -107,13 +106,13 @@
             font-size: 1em;
             background: #fafbfc;
         }
-        input[type="text"]:focus, select:focus {
-            border-color: #00796b;
+        .transaction-form input[type="text"]:focus, .transaction-form select:focus {
+            border-color: #1976d2;
             outline: none;
-            box-shadow: 0 0 0 2px rgba(0, 121, 107, 0.13);
+            box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.13);
         }
-        button {
-            background-color: #00796b;
+        .transaction-form button {
+            background-color: #1976d2;
             color: white;
             padding: 12px 0;
             border: none;
@@ -125,16 +124,23 @@
             width: 100%;
             transition: background 0.2s, transform 0.15s;
         }
-        button.back-button {
-            background-color: #6c757d;
-            margin-top: 10px;
-        }
-        button:hover {
-            background: #004d40;
+        .transaction-form button:hover {
+            background: #0d47a1;
             transform: translateY(-2px);
         }
-        button.back-button:hover {
-            background-color: #5a6268;
+        .back-btn {
+            display: inline-block;
+            background: #6c757d;
+            color: #fff;
+            padding: 10px 28px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            margin-top: 10px;
+            transition: background 0.2s;
+        }
+        .back-btn:hover {
+            background: #495057;
         }
         @media (max-width: 900px) {
             .sidebar-nav {
@@ -155,11 +161,10 @@
             }
         }
         @media (max-width: 600px) {
-            .form-container {
-                padding: 18px 6px;
-                margin: 0 2px;
+            .main-content {
+                padding: 10px 0;
             }
-            h2 {
+            h1 {
                 font-size: 1.3em;
             }
         }
@@ -167,52 +172,41 @@
 </head>
 <body>
     <div class="sidebar-nav">
-        <a th:href="@{/admin/dashboard}"><span class="icon">👤</span><span>Daftar User</span></a>
-        <a th:href="@{/admin/transactions}" class="active"><span class="icon">📋</span><span>Lihat Semua Transaksi</span></a>
-        <a th:href="@{/admin/user/add}"><span class="icon">➕</span><span>Tambah User Baru</span></a>
-        <a th:href="@{/admin/analytics}"><span class="icon">📊</span><span>Analytics Dashboard</span></a>
+        <a th:href="@{/user/dashboard}"><span class="icon">🏠</span><span>Dashboard</span></a>
+        <a th:href="@{/user/transactions}" class="active"><span class="icon">📋</span><span>Transaksi</span></a>
+        <a th:href="@{/user/analytics}"><span class="icon">📊</span><span>Analytics</span></a>
+        <a th:href="@{/user/categories}"><span class="icon">🗂️</span><span>Kategori</span></a>
     </div>
     <div class="main-content">
-    <div class="form-container">
-        <h2>Tambah Transaksi Baru (Admin)</h2>
+        <h1>Tambah Transaksi</h1>
         <div th:if="${message}" class="message-box success" th:text="${message}"></div>
         <div th:if="${error}" class="message-box error" th:text="${error}"></div>
-        <form th:action="@{/admin/transaction}" method="post" onsubmit="return validateTransactionForm()">
+        <form th:action="@{/user/transactions/add}" method="post" class="transaction-form" onsubmit="return validateUserTransactionForm()">
             <div class="form-group">
-                <label for="description">Deskripsi / Keterangan:</label>
-                <input type="text" id="description" name="description" placeholder="Deskripsi transaksi" required minlength="3" maxlength="100">
+                <label for="description">Deskripsi:</label>
+                <input type="text" name="description" id="description" required minlength="3" maxlength="100">
             </div>
             <div class="form-group">
                 <label for="amount">Jumlah:</label>
-                <input type="text" id="amount" name="amount" placeholder="Contoh: 50.000" required autocomplete="off">
+                <input type="text" name="amount" id="amount" placeholder="Contoh: 50.000" required autocomplete="off">
                 <small style="color:#888;">Masukkan angka tanpa titik/koma saat tambah, atau gunakan format 50.000 untuk lima puluh ribu.</small>
             </div>
             <div class="form-group">
                 <label for="type">Tipe:</label>
-                <select id="type" name="type" required>
+                <select name="type" id="type" required>
                     <option value="Pemasukan">Pemasukan</option>
                     <option value="Pengeluaran">Pengeluaran</option>
                 </select>
             </div>
             <div class="form-group">
-                <label for="categoryId">Kategori:</label>
-                <select id="categoryId" name="categoryId" required>
-                    <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
-                </select>
+                <label for="categoryName">Kategori:</label>
+                <input type="text" name="categoryName" id="categoryName" required placeholder="Isi kategori (bebas)">
             </div>
-            <div class="form-group">
-                <label for="userId">Pilih User:</label>
-                <select id="userId" name="userId" required>
-                    <option th:each="user : ${users}" th:value="${user.id}" th:text="${user.username}"></option>
-                </select>
-            </div>
-            <button type="submit" class="main-button">Tambah Transaksi</button>
+            <button type="submit">Tambah</button>
         </form>
-        <a th:href="@{/admin/transactions}">
-            <button type="button" class="back-button">Kembali ke Daftar Transaksi</button>
-        </a>
+        <a href="/user/transactions" class="back-btn">Kembali ke Transaksi</a>
         <script>
-        function validateTransactionForm() {
+        function validateUserTransactionForm() {
             const desc = document.getElementById('description').value.trim();
             const amount = document.getElementById('amount').value.replace(/\./g, '');
             if (desc.length < 3 || desc.length > 100) {
@@ -238,7 +232,6 @@
             });
         });
         </script>
-    </div>
     </div>
 </body>
 </html>

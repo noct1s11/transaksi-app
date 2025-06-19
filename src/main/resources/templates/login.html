@@ -162,6 +162,10 @@
         <div th:if="${param.registered}" class="message-box success show">
             Registrasi berhasil! Silakan login.
         </div>
+        <!-- Pesan jika session expired atau belum login -->
+        <div th:if="${param.session}" class="message-box error show">
+            Sesi Anda telah berakhir, silakan login ulang.
+        </div>
         <form th:action="@{/login}" method="post">
             <input type="text" name="username" placeholder="Nama Pengguna" required autofocus>
             <input type="password" name="password" placeholder="Kata Sandi" required>

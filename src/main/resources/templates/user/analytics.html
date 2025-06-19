@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
     <style>
         body { font-family: 'Inter', sans-serif; margin: 0; background: #f0f4f8; color: #333; min-height: 100vh; display: flex; }
         .sidebar { width: 220px; background: linear-gradient(180deg, #1a73e8 70%, #43e97b 100%); color: #fff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 32px 0 24px 0; box-shadow: 2px 0 16px rgba(33,150,243,0.10); position: fixed; left: 0; top: 0; z-index: 10; border-top-right-radius: 24px; border-bottom-right-radius: 24px; }
@@ -21,7 +22,16 @@
         .sidebar .logout-form button { width: 100%; background: linear-gradient(90deg, #dc3545 60%, #ff6f61 100%); color: white; border: none; padding: 12px 0; border-radius: 10px; cursor: pointer; font-size: 1.08em; font-weight: 700; transition: background 0.3s, transform 0.2s; box-shadow: 0 2px 8px rgba(220,53,69,0.10); }
         .sidebar .logout-form button:hover { background: linear-gradient(90deg, #c82333 60%, #ff6f61 100%); color: #fff; transform: scale(1.04); }
         .main-content { margin-left: 220px; width: calc(100% - 220px); padding: 40px 30px 30px 30px; min-height: 100vh; background: #f7fbff; }
-        h1 { color: #1a73e8; text-align: center; margin-bottom: 30px; font-size: 2.2em; font-weight: 700; }
+        h1 { color: #1a73e8; text-align: left; margin-bottom: 30px; font-size: 2.2em; font-weight: 700; }
+        .alert { padding: 15px; margin-bottom: 20px; border-radius: 5px; }
+        .alert-success { background-color: #d4edda; color: #155724; border-color: #c3e6cb; }
+        .alert-error { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+        .chart-section { background: #fff; border-radius: 16px; box-shadow: 0 4px 24px rgba(33,150,243,0.08); padding: 32px 28px; margin-bottom: 32px; display: flex; flex-wrap: wrap; gap: 32px; align-items: flex-start; justify-content: center; }
+        .chart-container { flex: 2; min-width: 320px; max-width: 600px; }
+        .pie-container { flex: 1; min-width: 220px; max-width: 320px; }
+        .footer { margin-top: 40px; color: #888; font-size: 0.95em; text-align: center; }
+        @media (max-width: 900px) { .main-content { padding: 20px 5px 20px 5px; } .chart-section { padding: 18px 6px; } }
+        @media (max-width: 600px) { .sidebar { width: 100vw; position: static; border-radius: 0; flex-direction: row; justify-content: space-between; padding: 10px 0; } .main-content { margin-left: 0; width: 100vw; padding: 10px 2vw; } .chart-section { padding: 10px 2vw; flex-direction: column; gap: 18px; } }
     </style>
 </head>
 <body>
@@ -39,18 +49,32 @@
     </div>
     <div class="main-content">
         <h1>Analytics Dashboard</h1>
-        <div style="display:flex;flex-wrap:wrap;gap:32px;align-items:flex-start;margin-bottom:30px;justify-content:center;">
-            <div style="flex:2;min-width:320px;max-width:600px;">
+        <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+        <div class="chart-section">
+            <div class="chart-container">
                 <canvas id="lineChart"></canvas>
             </div>
-            <div style="flex:1;min-width:220px;max-width:320px;">
+            <div class="pie-container">
                 <canvas id="pieChart"></canvas>
             </div>
         </div>
+        <div class="footer">
+            &copy; 2025 Aplikasi Transaksi. Dibuat dengan <span style="color:#1a73e8">&#9829;</span> oleh Tim Anda.
+        </div>
         <script th:inline="javascript">
             // Data untuk grafik garis (total transaksi per tanggal)
-            const tanggalLabels = [[${transaksiPerTanggal.keySet()}]];
-            const totalPerTanggal = [[${transaksiPerTanggal.values()}]];
+            let tanggalLabels = [[${transaksiPerTanggal != null ? transaksiPerTanggal.keySet() : new java.util.ArrayList()}]];
+            let totalPerTanggal = [[${transaksiPerTanggal != null ? transaksiPerTanggal.values() : new java.util.ArrayList()}]];
+            // Jika hanya ada satu data, tambahkan dummy point agar line chart tetap membentuk garis
+            if (tanggalLabels.length === 1) {
+                // Tambahkan tanggal sebelum dan sesudah (dummy) dengan nilai 0
+                const date = new Date(tanggalLabels[0]);
+                const before = new Date(date); before.setDate(date.getDate() - 1);
+                const after = new Date(date); after.setDate(date.getDate() + 1);
+                tanggalLabels = [before.toISOString().slice(0,10), ...tanggalLabels, after.toISOString().slice(0,10)];
+                totalPerTanggal = [0, ...totalPerTanggal, 0];
+            }
             const ctxLine = document.getElementById('lineChart').getContext('2d');
             new Chart(ctxLine, {
                 type: 'line',
@@ -63,7 +87,8 @@
                         backgroundColor: 'rgba(67,233,123,0.15)',
                         tension: 0.3,
                         fill: true,
-                        pointRadius: 2
+                        pointRadius: 2,
+                        spanGaps: true
                     }]
                 },
                 options: {
@@ -72,21 +97,22 @@
                     scales: { x: { title: { display: true, text: 'Tanggal' } }, y: { title: { display: true, text: 'Jumlah (Rp)' } } }
                 }
             });
-            // Data untuk pie chart kategori
-            const kategoriLabels = [[${kategoriMap.keySet()}]];
-            const kategoriData = [[${kategoriMap.values()}]];
+            // Data untuk grafik pie (kategori)
+            const kategoriLabels = [[${kategoriStat != null ? kategoriStat.keySet() : new java.util.ArrayList()}]];
+            const kategoriTotals = [[${kategoriStat != null ? kategoriStat.values() : new java.util.ArrayList()}]];
             const ctxPie = document.getElementById('pieChart').getContext('2d');
             new Chart(ctxPie, {
                 type: 'pie',
                 data: {
                     labels: kategoriLabels,
                     datasets: [{
-                        data: kategoriData,
-                        backgroundColor: ['#1a73e8','#43e97b','#ff6f61','#fbbc05','#ab47bc','#29b6f6','#ffa726','#8d6e63'],
+                        data: kategoriTotals,
+                        backgroundColor: ['#1a73e8', '#43e97b', '#ff8f00', '#ff6f61', '#a259f7', '#f7b731'],
                         borderWidth: 1
                     }]
                 },
                 options: {
+                    responsive: true,
                     plugins: { legend: { position: 'bottom' } }
                 }
             });

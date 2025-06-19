@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Transaksi</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f5f7fa; margin: 0; min-height: 100vh; display: flex; }
+        .sidebar-nav { position: fixed; top: 0; left: 0; height: 100vh; width: 220px; background: #fff; box-shadow: 2px 0 16px rgba(0,0,0,0.07); padding: 40px 0 0 0; display: flex; flex-direction: column; z-index: 10; }
+        .sidebar-nav a { display: flex; align-items: center; padding: 14px 32px; margin-bottom: 8px; border-radius: 0 30px 30px 0; text-decoration: none; color: #333; font-weight: 500; font-size: 1.08em; transition: background 0.2s, color 0.2s; }
+        .sidebar-nav a:hover, .sidebar-nav a.active { background: #e3f2fd; color: #1976d2; }
+        .sidebar-nav .icon { margin-right: 12px; font-size: 1.2em; }
+        .main-content { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 40px 0; margin-left: 220px; min-height: 100vh; }
+        h1 { color: #1976d2; margin-bottom: 28px; font-size: 2em; font-weight: 700; }
+        .message-box { padding: 12px 18px; margin-bottom: 18px; border-radius: 7px; font-size: 1em; display: block; }
+        .message-box.success { background: #e8f5e9; color: #388e3c; border: 1px solid #388e3c; }
+        .message-box.error { background: #ffe0e0; color: #d32f2f; border: 1px solid #d32f2f; }
+        .transaction-form { background: #fff; padding: 32px 28px 24px 28px; border-radius: 14px; box-shadow: 0 8px 25px rgba(0,0,0,0.13); width: 100%; max-width: 420px; box-sizing: border-box; margin-bottom: 18px; }
+        .transaction-form .form-group { margin-bottom: 18px; text-align: left; }
+        .transaction-form label { display: block; margin-bottom: 6px; font-weight: 500; color: #555; }
+        .transaction-form input[type="text"], .transaction-form select { width: 100%; padding: 12px 10px; border: 1px solid #c8d8e0; border-radius: 6px; box-sizing: border-box; font-size: 1em; background: #fafbfc; }
+        .transaction-form input[type="text"]:focus, .transaction-form select:focus { border-color: #1976d2; outline: none; box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.13); }
+        .transaction-form button { background-color: #1976d2; color: white; padding: 12px 0; border: none; border-radius: 6px; cursor: pointer; font-size: 1.1em; font-weight: 600; margin-top: 10px; width: 100%; transition: background 0.2s, transform 0.15s; }
+        .transaction-form button:hover { background: #0d47a1; transform: translateY(-2px); }
+        .back-btn { display: inline-block; background: #6c757d; color: #fff; padding: 10px 28px; border-radius: 6px; text-decoration: none; font-weight: 500; margin-top: 10px; transition: background 0.2s; }
+        .back-btn:hover { background: #495057; }
+        @media (max-width: 900px) { .sidebar-nav { width: 60px; padding: 20px 0 0 0; } .sidebar-nav a { padding: 12px 10px; font-size: 1em; justify-content: center; } .sidebar-nav a span:not(.icon) { display: none; } .main-content { margin-left: 60px; padding: 20px 0; } }
+        @media (max-width: 600px) { .main-content { padding: 10px 0; } h1 { font-size: 1.3em; } }
+    </style>
+</head>
+<body>
+    <div class="sidebar-nav">
+        <a th:href="@{/user/dashboard}"><span class="icon">🏠</span><span>Dashboard</span></a>
+        <a th:href="@{/user/transactions}" class="active"><span class="icon">📋</span><span>Transaksi</span></a>
+        <a th:href="@{/user/analytics}"><span class="icon">📊</span><span>Analytics</span></a>
+        <a th:href="@{/user/categories}"><span class="icon">🗂️</span><span>Kategori</span></a>
+    </div>
+    <div class="main-content">
+        <h1>Edit Transaksi</h1>
+        <div th:if="${message}" class="message-box success" th:text="${message}"></div>
+        <div th:if="${error}" class="message-box error" th:text="${error}"></div>
+        <form th:action="@{/user/transactions/edit/{id}(id=${transaction.id})}" method="post" class="transaction-form" onsubmit="return validateUserTransactionForm()">
+            <div class="form-group">
+                <label for="description">Deskripsi:</label>
+                <input type="text" name="description" id="description" th:value="${transaction.description}" required minlength="3" maxlength="100">
+            </div>
+            <div class="form-group">
+                <label for="amount">Jumlah:</label>
+                <input type="text" name="amount" id="amount" th:value="${#numbers.formatDecimal(transaction.amount, 0, 'POINT', 0, 'NONE')}" placeholder="Contoh: 50.000" required autocomplete="off">
+                <small style="color:#888;">Masukkan angka tanpa titik/koma saat edit, atau gunakan format 50.000 untuk lima puluh ribu.</small>
+            </div>
+            <div class="form-group">
+                <label for="type">Tipe:</label>
+                <select name="type" id="type" required>
+                    <option value="Pemasukan" th:selected="${transaction.type == 'Pemasukan'}">Pemasukan</option>
+                    <option value="Pengeluaran" th:selected="${transaction.type == 'Pengeluaran'}">Pengeluaran</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="categoryId">Kategori:</label>
+                <select name="categoryId" id="categoryId" required>
+                    <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}" th:selected="${transaction.category == cat.name}"></option>
+                </select>
+            </div>
+            <button type="submit">Simpan Perubahan</button>
+        </form>
+        <a th:href="@{/user/transactions}" class="back-btn">Kembali ke Transaksi</a>
+        <script>
+        function validateUserTransactionForm() {
+            const desc = document.getElementById('description').value.trim();
+            const amount = document.getElementById('amount').value.replace(/\./g, '');
+            if (desc.length < 3 || desc.length > 100) {
+                alert('Deskripsi minimal 3 karakter dan maksimal 100 karakter.');
+                return false;
+            }
+            if (isNaN(amount) || Number(amount) <= 0) {
+                alert('Jumlah harus lebih dari 0.');
+                return false;
+            }
+            return true;
+        }
+        // Format angka ribuan saat input
+        document.addEventListener('DOMContentLoaded', function() {
+            var amountInput = document.getElementById('amount');
+            amountInput.addEventListener('input', function(e) {
+                let value = this.value.replace(/\./g, '');
+                if (!isNaN(value) && value.length > 0) {
+                    this.value = Number(value).toLocaleString('id-ID');
+                } else {
+                    this.value = '';
+                }
+            });
+        });
+        </script>
+    </div>
+</body>
+</html>

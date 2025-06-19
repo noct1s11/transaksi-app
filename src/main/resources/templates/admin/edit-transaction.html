@@ -4,163 +4,179 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Transaksi (Admin)</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
     <style>
         body {
             font-family: 'Inter', sans-serif;
+            background-color: #fff3e0;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+        }
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 240px;
+            background: #fff;
+            box-shadow: 2px 0 16px rgba(0,0,0,0.07);
+            padding: 40px 0 0 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+        }
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            padding: 14px 32px;
+            margin-bottom: 8px;
+            border-radius: 0 30px 30px 0;
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            font-size: 1.08em;
+            transition: background 0.2s, color 0.2s;
+        }
+        .sidebar-nav a:hover, .sidebar-nav a.active {
+            background: #ffecb3;
+            color: #ff8f00;
+        }
+        .sidebar-nav .icon {
+            margin-right: 12px;
+            font-size: 1.2em;
+        }
+        .main-content {
+            flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
+            padding: 40px 0;
+            margin-left: 240px;
             min-height: 100vh;
-            background-color: #fff3e0; /* Light orange background */
-            margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
         }
         .form-container {
             background: white;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            padding: 40px 36px 32px 36px;
+            border-radius: 14px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.13);
             width: 100%;
-            max-width: 600px;
+            max-width: 520px;
             box-sizing: border-box;
             text-align: center;
         }
         h2 {
-            color: #ff8f00; /* Orange color */
-            margin-bottom: 30px;
+            color: #ff8f00;
+            margin-bottom: 28px;
             font-size: 2em;
-            font-weight: 600;
+            font-weight: 700;
         }
         .message-box {
-            padding: 10px 15px;
-            margin-bottom: 20px;
-            border-radius: 6px;
-            font-size: 0.95em;
+            padding: 12px 18px;
+            margin-bottom: 18px;
+            border-radius: 7px;
+            font-size: 1em;
             display: block;
         }
+        .message-box.success {
+            background: #e8f5e9;
+            color: #388e3c;
+            border: 1px solid #388e3c;
+        }
         .message-box.error {
-            background-color: #ffe0e0;
+            background: #ffe0e0;
             color: #d32f2f;
             border: 1px solid #d32f2f;
         }
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 18px;
             text-align: left;
         }
         .form-group label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 6px;
             font-weight: 500;
             color: #555;
         }
-        input[type="text"], input[type="number"], select {
-            width: calc(100% - 20px);
+        input[type="text"], select {
+            width: 100%;
             padding: 12px 10px;
             border: 1px solid #c8d8e0;
             border-radius: 6px;
             box-sizing: border-box;
             font-size: 1em;
+            background: #fafbfc;
         }
-        input[type="text"]:focus, input[type="number"]:focus, select:focus {
+        input[type="text"]:focus, select:focus {
             border-color: #ff8f00;
             outline: none;
-            box-shadow: 0 0 0 3px rgba(255, 143, 0, 0.2);
+            box-shadow: 0 0 0 2px rgba(255, 143, 0, 0.13);
         }
         button {
-            background-color: #ff8f00; /* Orange */
+            background-color: #ff8f00;
             color: white;
-            padding: 12px 25px;
+            padding: 12px 0;
             border: none;
             border-radius: 6px;
             cursor: pointer;
             font-size: 1.1em;
-            font-weight: 500;
-            margin-top: 20px;
-            transition: background-color 0.3s ease, transform 0.2s ease;
+            font-weight: 600;
+            margin-top: 10px;
             width: 100%;
+            transition: background 0.2s, transform 0.15s;
         }
         button.back-button {
             background-color: #6c757d;
             margin-top: 10px;
         }
         button:hover {
+            background: #e07b00;
             transform: translateY(-2px);
         }
         button.back-button:hover {
             background-color: #5a6268;
         }
-        button.main-button:hover {
-            background-color: #e07b00;
-        }
-
-        /* Logout button */
-        .logout-form {
-            margin-top: 20px;
-            align-self: flex-end;
-        }
-        @media (max-height: 700px) {
-            .logout-form {
-                margin-top: 10px;
-                position: static;
+        @media (max-width: 900px) {
+            .sidebar-nav {
+                width: 60px;
+                padding: 20px 0 0 0;
+            }
+            .sidebar-nav a {
+                padding: 12px 10px;
+                font-size: 1em;
+                justify-content: center;
+            }
+            .sidebar-nav a span:not(.icon) {
+                display: none;
+            }
+            .main-content {
+                margin-left: 60px;
+                padding: 20px 0;
             }
         }
-
-        /* Responsive */
         @media (max-width: 600px) {
             .form-container {
-                padding: 25px;
-                margin: 0 10px;
+                padding: 18px 6px;
+                margin: 0 2px;
             }
             h2 {
-                font-size: 1.8em;
+                font-size: 1.3em;
             }
-        }
-
-        /* Sidebar styles */
-        .sidebar-nav {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            width: 250px;
-            box-sizing: border-box;
-        }
-        .sidebar-nav a {
-            display: flex;
-            align-items: center;
-            padding: 10px 15px;
-            margin-bottom: 10px;
-            border-radius: 6px;
-            text-decoration: none;
-            color: #333;
-            font-weight: 500;
-            transition: background-color 0.3s ease;
-        }
-        .sidebar-nav a:hover {
-            background-color: #f0f0f0;
-        }
-        .sidebar-nav .icon {
-            margin-right: 10px;
-            font-size: 1.2em;
         }
     </style>
 </head>
 <body>
     <div class="sidebar-nav">
-        <a th:href="@{/admin/dashboard}"><span class="icon">👤</span>Daftar User</a>
-        <a th:href="@{/admin/transactions}"><span class="icon">📋</span>Lihat Semua Transaksi</a>
-        <a th:href="@{/admin/user/add}"><span class="icon">➕</span>Tambah User Baru</a>
-        <a th:href="@{/admin/analytics}"><span class="icon">📊</span>Analytics Dashboard</a>
+        <a th:href="@{/admin/dashboard}"><span class="icon">👤</span><span>Daftar User</span></a>
+        <a th:href="@{/admin/transactions}" class="active"><span class="icon">📋</span><span>Lihat Semua Transaksi</span></a>
+        <a th:href="@{/admin/user/add}"><span class="icon">➕</span><span>Tambah User Baru</span></a>
+        <a th:href="@{/admin/analytics}"><span class="icon">📊</span><span>Analytics Dashboard</span></a>
     </div>
+    <div class="main-content">
     <div class="form-container">
         <h2>Edit Transaksi (Admin)</h2>
-
+        <div th:if="${message}" class="message-box success" th:text="${message}"></div>
         <div th:if="${error}" class="message-box error" th:text="${error}"></div>
-
         <form th:action="@{/admin/transaction/{id}(id=${transaction.id})}" method="post">
             <div class="form-group">
                 <label for="description">Deskripsi / Keterangan:</label>
@@ -168,7 +184,8 @@
             </div>
             <div class="form-group">
                 <label for="amount">Jumlah:</label>
-                <input type="number" id="amount" name="amount" th:value="${transaction.amount}" step="0.01" required>
+                <input type="text" id="amount" name="amount" th:value="${#numbers.formatDecimal(transaction.amount, 0, 'POINT', 0, 'NONE')}" placeholder="Contoh: 50.000" required autocomplete="off">
+                <small style="color:#888;">Masukkan angka tanpa titik/koma saat edit, atau gunakan format 50.000 untuk lima puluh ribu.</small>
             </div>
             <div class="form-group">
                 <label for="type">Tipe:</label>
@@ -178,8 +195,8 @@
                 </select>
             </div>
             <div class="form-group">
-                <label for="category">Kategori (Opsional):</label>
-                <input type="text" id="category" name="category" th:value="${transaction.category}">
+                <label for="category">Kategori:</label>
+                <input type="text" id="category" name="category" th:value="${transaction.category}" placeholder="Contoh: Makanan, Transportasi">
             </div>
             <div class="form-group">
                 <label for="userId">Pilih User:</label>
@@ -193,5 +210,22 @@
             <button type="button" class="back-button">Kembali ke Daftar Transaksi</button>
         </a>
     </div>
+    </div>
+    <script>
+    // Format angka ribuan saat input (hanya jika user mengetik manual)
+    document.addEventListener('DOMContentLoaded', function() {
+        var amountInput = document.getElementById('amount');
+        let lastValue = amountInput.value;
+        amountInput.addEventListener('input', function(e) {
+            let value = this.value.replace(/\./g, '');
+            if (!isNaN(value) && value.length > 0) {
+                this.value = Number(value).toLocaleString('id-ID');
+            } else {
+                this.value = '';
+            }
+            lastValue = this.value;
+        });
+    });
+    </script>
 </body>
 </html>
